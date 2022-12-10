@@ -239,7 +239,7 @@ int main(){
         res.set_static_file_info("static/index.html");
         res.end();
     });
-    CROW_ROUTE(webserver, "/game").websocket().
+    CROW_ROUTE(webserver, "/tron-ws/").websocket().
     onopen([](crow::websocket::connection& _conn){
         crow::websocket::connection* conn = &_conn;
         sendPlayersTo(conn);
@@ -288,6 +288,6 @@ int main(){
     pthread_t mainloopThread;
     pthread_create(&mainloopThread, NULL, &mainloop, NULL);
     pthread_detach(mainloopThread);
-    webserver.port(8080).multithreaded().run();
+    webserver.port(8070).multithreaded().run();
     return 8675309; // Look, if you don't know don't ask, just go get a life.
 }

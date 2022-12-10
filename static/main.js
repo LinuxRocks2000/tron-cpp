@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://" + location.host + "/game");
+const socket = new WebSocket("ws://" + location.host + "/tron-ws");
 var gameCanvas = document.getElementById("game");
 var ctx = gameCanvas.getContext("2d");
 
