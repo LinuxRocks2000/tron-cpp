@@ -12,6 +12,8 @@ struct Line{
     long x2;
     long y1;
     long y2;
+    unsigned long placeID;
+    unsigned long id;
 
     Line(long _x1, long _y1, long _x2, long _y2){
         x1 = _x1;
@@ -121,7 +123,7 @@ bool isCollide(Player* p){
 
 
 void sendLineToConnection(Line* line, crow::websocket::connection* conn){
-    conn -> send_text("l," + std::to_string(line -> x1) + "," + std::to_string(line -> y1) + "," + std::to_string(line -> x2) + "," + std::to_string(line -> y2));
+    conn -> send_text("l," + std::to_string(line -> x1) + "," + std::to_string(line -> y1) + "," + std::to_string(line -> x2) + "," + std::to_string(line -> y2) + "," + std::to_string(line -> id));
 }
 
 
@@ -180,6 +182,9 @@ void drawLine(Player* player){
         return;
     }
     Line* l = new Line (player -> sX, player -> sY, player -> x, player -> y);
+    l -> placeID = player -> id;
+    l -> id = topID;
+    topID ++;
     sendLineToAll(l);
     lines.push_back(l);
     player -> sX = player -> x;
@@ -201,12 +206,25 @@ void disconnect(crow::websocket::connection* conn){
 }
 
 
+void deleteLine(Line* l){
+    broadcastToAll("d" + std::to_string(l -> id)); // d might be reusable.
+}
+
+
 void murder(Player* player){
     for (const auto& pair : players){
         if (pair.second == player){
             pair.first -> send_text("die");
             //pair.first -> close();
             disconnect(pair.first);
+            for (unsigned long i = 0; i < lines.size(); i ++){
+                if (lines[i] -> placeID == pair.second -> id){
+                    deleteLine(lines[i]);
+                    delete lines[i];
+                    lines.erase(lines.begin() + i);
+                    i --;
+                }
+            }
             break;
         }
     }
@@ -239,7 +257,7 @@ int main(){
         res.set_static_file_info("static/index.html");
         res.end();
     });
-    CROW_ROUTE(webserver, "/tron-ws/").websocket().
+    CROW_ROUTE(webserver, "/tron-ws").websocket().
     onopen([](crow::websocket::connection& _conn){
         crow::websocket::connection* conn = &_conn;
         sendPlayersTo(conn);

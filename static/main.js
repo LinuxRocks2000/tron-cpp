@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://" + location.host + "/tron-ws");
+const socket = new WebSocket("ws://" + location.host + "/tron/tron-ws");
 var gameCanvas = document.getElementById("game");
 var ctx = gameCanvas.getContext("2d");
 
@@ -45,10 +45,17 @@ socket.addEventListener("message", (event) => {
         });
     }
     else if (args[0] == "l"){
-        lines.push([parseInt(args[1]), parseInt(args[2]), parseInt(args[3]), parseInt(args[4])]);
+        lines.push([parseInt(args[1]), parseInt(args[2]), parseInt(args[3]), parseInt(args[4]), parseInt(args[5])]);
     }
     else if (args[0] == "die"){
         alert("dead.");
+    }
+    else if (args[0] == "d"){
+        lines.forEach((item, i) => {
+            if (item[4] == args[1]){
+                lines.splice(i, 1);
+            }
+        });
     }
 });
 
